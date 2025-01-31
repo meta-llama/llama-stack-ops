@@ -15,7 +15,7 @@ on:
 
 jobs:
   publish-to-testpypi:
-    uses: meta-llama/llama-stack-ops/actions/upload-test-packages@main
+    uses: ./actions/upload-test-packages/action.yaml
     with:
       version: ${{ inputs.version }}
       pypi_token: ${{ secrets.PYPI_TOKEN }}

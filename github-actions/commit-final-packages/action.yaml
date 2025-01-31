@@ -1,0 +1,38 @@
+name: 'Commit final packages'
+description: 'Commit final packages'
+inputs:
+  version:
+    description: 'Version of the package to publish'
+    required: true
+  pypi_token:
+    description: 'PyPI token for authentication'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build and publish
+      shell: bash
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ inputs.pypi_token }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        chmod +x ${{ github.action_path }}/main.sh
+        ${{ github.action_path }}/main.sh
+
+# Example usage in workflow:
+# - uses: meta-llama/llama-stack-ops/commit-final-packages@main
+#   with:
+#     version: '1.0.0'
+#     pypi_token: ${{ secrets.PYPI_TOKEN }}

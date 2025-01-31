@@ -1,0 +1,44 @@
+name: 'Upload test packages to test.pypi'
+description: 'Upload test packages to test.pypi'
+inputs:
+  version:
+    description: 'Version of the package to publish'
+    required: true
+  branch:
+    description: 'Git branch to publish from'
+    required: false
+    default: ''
+  pypi_token:
+    description: 'PyPI token for authentication'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build and publish
+      shell: bash
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ inputs.pypi_token }}
+        VERSION: ${{ inputs.version }}
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        chmod +x ${{ github.action_path }}/main.sh
+        ${{ github.action_path }}/main.sh
+
+# Example usage in workflow:
+# - uses: meta-llama/llama-stack-ops/upload-test-packages@main
+#   with:
+#     version: 0.1.1rc2
+#     branch: main
+#     pypi_token: ${{ secrets.PYPI_TOKEN }}

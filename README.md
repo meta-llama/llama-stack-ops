@@ -1,1 +1,2 @@
-# llama-stack-ops
+# Operations (CI, etc.) for Llama Stack
+

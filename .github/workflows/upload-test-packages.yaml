@@ -16,7 +16,7 @@ on:
 jobs:
   publish-to-testpypi:
     uses: actions/checkout@v4
-    uses: ./actions/upload-test-packages@main
+    uses: ./actions/upload-test-packages
     with:
       version: ${{ inputs.version }}
       pypi_token: ${{ secrets.PYPI_TOKEN }}

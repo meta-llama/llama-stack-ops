@@ -15,7 +15,7 @@ on:
 
 jobs:
   publish-to-testpypi:
-    uses: ./actions/upload-test-packages/action.yaml
+    uses: ./actions/upload-test-packages/action.yaml@main
     with:
       version: ${{ inputs.version }}
       pypi_token: ${{ secrets.PYPI_TOKEN }}

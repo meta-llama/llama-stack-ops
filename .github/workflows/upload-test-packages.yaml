@@ -1,0 +1,73 @@
+# Use the upload-test-packages action to upload test packages to test.pypi, 
+# grab secrets from the llama-stack-client-python repo
+
+name: Publish Python Test Packages 📦 to TestPyPI
+
+on:
+  workflow_dispatch:  # Keep manual trigger
+    inputs:
+      version:
+        description: 'Version number (e.g. 0.0.63.dev20250111)'
+        required: true
+        type: string
+  schedule:
+    - cron: "0 0 * * *"  # Run every day at midnight
+
+jobs:
+  publish-to-testpypi:
+    uses: meta-llama/llama-stack-ops/actions/upload-test-packages@main
+    with:
+      version: ${{ inputs.version }}
+      pypi_token: ${{ secrets.PYPI_TOKEN }}
+
+  test-published-package:
+    name: Test published package
+    needs:
+      - publish-to-testpypi
+    runs-on: ubuntu-latest
+    env:
+      TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+      TAVILY_SEARCH_API_KEY: ${{ secrets.TAVILY_SEARCH_API_KEY }}
+    steps:
+    - name: Install the package
+      run: |
+        VERSION=${{ inputs.version }}
+        max_attempts=6
+        attempt=1
+        while [ $attempt -le $max_attempts ]; do
+          echo "Attempt $attempt of $max_attempts to install package..."
+          if pip install --no-cache --extra-index-url https://test.pypi.org/simple/ llama-stack==${VERSION} llama-models==${VERSION} llama-stack-client==${VERSION}; then
+            echo "Package installed successfully"
+            break
+          fi
+          if [ $attempt -ge $max_attempts ]; then
+            echo "Failed to install package after $max_attempts attempts"
+            exit 1
+          fi
+          attempt=$((attempt + 1))
+          sleep 10
+        done
+    - name: Test the package versions
+      run: |
+        pip list | grep llama_
+    - name: Test CLI commands
+      run: |
+        llama model list
+        llama stack build --list-templates
+        llama model prompt-format -m Llama3.2-11B-Vision-Instruct
+        llama stack list-apis
+        llama stack list-providers inference
+        llama stack list-providers telemetry
+    - name: Test Notebook
+      run: |
+        echo "Cloning llama-stack repo"
+        git clone --depth 1 https://github.com/meta-llama/llama-stack.git
+        cd llama-stack
+        git checkout main
+        echo "Installing pytest and nbval"
+        pip install pytest nbval
+        echo "Building llama-stack"
+        llama stack build --template together --image-type venv
+        echo "Running tests"
+        # pytest -v -s --nbval-lax ./docs/getting_started.ipynb
+        # pytest -v -s --nbval-lax ./docs/notebooks/Llama_Stack_Benchmark_Evals.ipynb

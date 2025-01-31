@@ -32,7 +32,7 @@ runs:
         ${{ github.action_path }}/main.sh
 
 # Example usage in workflow:
-# - uses: meta-llama/llama-stack-ops/commit-final-packages@main
+# - uses: meta-llama/llama-stack-ops/actions/commit-final-packages@main
 #   with:
 #     version: '1.0.0'
 #     pypi_token: ${{ secrets.PYPI_TOKEN }}

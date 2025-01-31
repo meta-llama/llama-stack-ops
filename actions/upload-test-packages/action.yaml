@@ -37,7 +37,7 @@ runs:
         ${{ github.action_path }}/main.sh
 
 # Example usage in workflow:
-# - uses: meta-llama/llama-stack-ops/upload-test-packages@main
+# - uses: meta-llama/llama-stack-ops/actions/upload-test-packages@main
 #   with:
 #     version: 0.1.1rc2
 #     branch: main

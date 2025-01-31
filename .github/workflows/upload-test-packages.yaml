@@ -15,6 +15,7 @@ on:
 
 jobs:
   publish-to-testpypi:
+    uses: actions/checkout@v4
     uses: ./actions/upload-test-packages@main
     with:
       version: ${{ inputs.version }}

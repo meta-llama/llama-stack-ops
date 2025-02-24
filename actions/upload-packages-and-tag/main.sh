@@ -40,10 +40,6 @@ for repo in "${REPOS[@]}"; do
   echo "Tagging llama-$repo at version $VERSION (not pushing yet)"
   git tag -a "v$VERSION" -m "Release version $VERSION"
 
-  echo "Merging rc-$VERSION into main"
-  git checkout main
-  git merge --ff-only "rc-$VERSION"
-
   echo "Uploading llama-$repo to testpypi"
   python -m twine upload \
     --repository-url https://test.pypi.org/legacy/ \

@@ -1,10 +1,6 @@
 name: 'Publish Docker images'
-description: 'Publish Docker images; PyPI packages must already be published'
+description: 'Publish Docker images; Using the main branch'
 inputs:
-  version:
-    description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
-    required: true
-    type: string
   templates:
     description: 'Optional comma-separated templates to publish'
     required: false
@@ -34,9 +30,7 @@ runs:
         username: ${{ inputs.dockerhub_username }}
         password: ${{ inputs.dockerhub_token }}
 
-
     - name: Pull the main branch of llama-stack
-      if: startsWith(github.event.inputs.version, 'nightly-')
       uses: actions/checkout@v2
       with:
         ref: 'main'
@@ -51,9 +45,3 @@ runs:
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh
-
-# Example usage in workflow:
-# - uses: meta-llama/llama-stack-ops/actions/commit-final-packages@main
-#   with:
-#     version: '1.0.0'
-#     pypi_token: ${{ secrets.PYPI_TOKEN }}

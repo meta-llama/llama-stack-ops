@@ -8,6 +8,10 @@ inputs:
     description: 'Commit ID for "cut" (default: origin/main)'
     required: false
     default: ''
+  only_test_dont_cut:
+    description: 'Do not cut a branch, only run tests (default: false)'
+    required: false
+    default: 'false'
   fireworks_api_key:
     description: 'Fireworks API key'
     required: true
@@ -51,6 +55,7 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
         COMMIT_ID: ${{ inputs.commit_id }}
+        ONLY_TEST_DONT_CUT: ${{ inputs.only_test_dont_cut }}
         TOGETHER_API_KEY: ${{ inputs.together_api_key }}
         TAVILY_SEARCH_API_KEY: ${{ inputs.tavily_search_api_key }}
         FIREWORKS_API_KEY: ${{ inputs.fireworks_api_key }}

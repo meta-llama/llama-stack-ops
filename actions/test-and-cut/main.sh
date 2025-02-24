@@ -10,6 +10,7 @@ if [ -z "${COMMIT_ID+x}" ]; then
 fi
 
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
+ONLY_TEST_DONT_CUT=${ONLY_TEST_DONT_CUT:-false}
 
 TEMPLATE=fireworks
 
@@ -83,6 +84,7 @@ test_docker() {
   echo "Testing docker"
 
   USE_COPY_NOT_MOUNT=true LLAMA_STACK_DIR=llama-stack LLAMA_MODELS_DIR=llama-models \
+    LLAMA_STACK_CLIENT_DIR=llama-stack-client-python \
     llama stack build --template $TEMPLATE --image-type container
 
   docker images
@@ -128,10 +130,16 @@ test_llama_cli
 test_library_client
 test_docker
 
+# if ONLY_TEST_DONT_CUT is truthy, don't cut the branch
+if [ "$ONLY_TEST_DONT_CUT" = "1" ] || [ "$ONLY_TEST_DONT_CUT" = "true" ]; then
+  echo "Not cutting (i.e., pushing the branch) because ONLY_TEST_DONT_CUT is true"
+  exit 0
+fi
+
 for repo in "${REPOS[@]}"; do
   echo "Pushing branch rc-$VERSION for llama-$repo"
   cd llama-$repo
-  git push "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git" "rc-$VERSION"
+  git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git" "rc-$VERSION"
   cd ..
 
 done

@@ -23,42 +23,44 @@ cd $TMPDIR
 uv venv -p python3.10
 source .venv/bin/activate
 
-uv pip install twine
+build_packages() {
+  uv pip install twine
 
-REPOS=(models stack-client-python stack)
-for repo in "${REPOS[@]}"; do
-  if [ "$repo" == "stack" ] && [ -n "$COMMIT_ID" ]; then
-    git clone --depth 1 --branch "$COMMIT_ID" "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
-  else
-    git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
-  fi
-  cd llama-$repo
-  git checkout -b "rc-$VERSION"
+  REPOS=(models stack-client-python stack)
+  for repo in "${REPOS[@]}"; do
+    git clone --depth 10 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
+    cd llama-$repo
 
-  perl -pi -e "s/version = .*$/version = \"$VERSION\"/" pyproject.toml
-  if [ -f "src/llama_stack_client/_version.py" ]; then
-    perl -pi -e "s/__version__ = .*$/__version__ = \"$VERSION\"/" src/llama_stack_client/_version.py
-  fi
+    if [ "$repo" == "stack" ] && [ -n "$COMMIT_ID" ]; then
+      git checkout -b "rc-$VERSION" "$COMMIT_ID"
+    else
+      git checkout -b "rc-$VERSION"
+    fi
 
-  perl -pi -e "s/llama-models>=.*/llama-models>=$VERSION/" pyproject.toml
-  perl -pi -e "s/llama-stack-client>=.*/llama-stack-client>=$VERSION/" pyproject.toml
-    
-  uv build -q
-  uv pip install dist/*.whl
+    perl -pi -e "s/version = .*$/version = \"$VERSION\"/" pyproject.toml
+    if [ -f "src/llama_stack_client/_version.py" ]; then
+      perl -pi -e "s/__version__ = .*$/__version__ = \"$VERSION\"/" src/llama_stack_client/_version.py
+    fi
 
-  git commit -am "Release candidate $VERSION"
-  cd ..
-done
+    perl -pi -e "s/llama-models>=.*/llama-models>=$VERSION\",/" pyproject.toml
+    perl -pi -e "s/llama-stack-client>=.*/llama-stack-client>=$VERSION\",/" pyproject.toml
+      
+    uv build -q
+    uv pip install dist/*.whl
 
-uv pip list | grep llama
-llama model prompt-format -m Llama3.2-11B-Vision-Instruct
-llama model list
-llama stack list-apis
-llama stack list-providers inference
-llama stack list-providers telemetry
+    git commit -am "Release candidate $VERSION"
+    cd ..
+  done
+}
 
-uv pip install pytest nbval pytest-asyncio
-
+test_llama_cli() {
+  uv pip list | grep llama
+  llama model prompt-format -m Llama3.2-11B-Vision-Instruct
+  llama model list
+  llama stack list-apis
+  llama stack list-providers inference
+  llama stack list-providers telemetry
+}
 
 test_library_client() {
   echo "Building template"
@@ -119,6 +121,11 @@ test_docker() {
   docker stop llama-stack-$TEMPLATE
 }
 
+build_packages
+
+uv pip install pytest nbval pytest-asyncio
+
+test_llama_cli
 test_library_client
 test_docker
 

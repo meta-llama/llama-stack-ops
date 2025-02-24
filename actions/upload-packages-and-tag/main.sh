@@ -22,15 +22,21 @@ uv pip install twine
 
 REPOS=(models stack-client-python stack)
 for repo in "${REPOS[@]}"; do
-  git clone --depth 1 --branch "rc-$VERSION" "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
+  git clone --depth 10 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
   cd llama-$repo
 
   echo "Building package..."
+  git fetch origin "rc-$VERSION":"rc-$VERSION"
+  git checkout "rc-$VERSION"
+
+  PYPROJECT_VERSION=$(cat pyproject.toml | grep version)
+  echo "version to build: $PYPROJECT_VERSION"
+
   uv build -q
   uv pip install dist/*.whl
 
   echo "Merging rc-$VERSION into main"
-  git checkout -b main origin/main
+  git checkout main
   git merge --ff-only "rc-$VERSION"
   echo "Tagging llama-$repo at version $VERSION"
   git tag -a "v$VERSION" -m "Release version $VERSION"

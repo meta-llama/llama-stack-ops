@@ -15,12 +15,11 @@ on:
 #    - cron: "0 0 * * *"  # Run every day at midnight
 
 jobs:
-  publish-to-testpypi:
+  test-and-cut:
     runs-on: ubuntu-latest
     environment:
       name: testrelease
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
       contents: read
     steps:
     - uses: actions/checkout@v4
@@ -34,6 +33,18 @@ jobs:
         # TODO: this will expire in 90 days; we should figure out a 
         # GitHub App setup that can be used instead
         github_token: ${{ secrets.LLAMA_REPOS_PAT }}        
+
+  upload-packages-and-tag:
+    needs:
+      - test-and-cut
+    environment:
+      name: testrelease
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      contents: read
+    steps:
+    - uses: actions/checkout@v4
     - uses: ./actions/upload-packages-and-tag
       with:
         version: ${{ inputs.version }}
@@ -43,7 +54,7 @@ jobs:
 
   test-published-package:
     needs:
-      - publish-to-testpypi
+      - upload-packages-and-tag
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

@@ -1,11 +1,11 @@
-name: 'Upload test packages to test.pypi'
-description: 'Upload test packages to test.pypi'
+name: 'Cut a Release Candidate'
+description: 'Cut a release candidate branch'
 inputs:
   version:
     description: 'Version of the package to publish'
     required: true
-  branch:
-    description: 'Git branch to publish from'
+  commit_id:
+    description: 'Commit ID for "cut" (default: origin/main)'
     required: false
     default: ''
   fireworks_api_key:
@@ -50,7 +50,7 @@ runs:
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
-        BRANCH: ${{ inputs.branch }}
+        COMMIT_ID: ${{ inputs.commit_id }}
         TOGETHER_API_KEY: ${{ inputs.together_api_key }}
         TAVILY_SEARCH_API_KEY: ${{ inputs.tavily_search_api_key }}
         FIREWORKS_API_KEY: ${{ inputs.fireworks_api_key }}
@@ -58,10 +58,3 @@ runs:
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh
-
-# Example usage in workflow:
-# - uses: meta-llama/llama-stack-ops/actions/upload-test-packages@main
-#   with:
-#     version: 0.1.1rc2
-#     branch: main
-#     pypi_token: ${{ secrets.PYPI_TOKEN }}

@@ -1,0 +1,34 @@
+name: 'Upload test packages to test.pypi and tag'
+inputs:
+  version:
+    description: 'Version of the package to publish'
+    required: true
+  github_token:
+    description: 'Personal Access Token (PAT) with access to all llama repositories'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - uses: astral-sh/setup-uv@v5
+      with:
+        python-version: '3.10'
+        enable-cache: false
+
+    - name: Configure Git
+      shell: bash
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Build and publish
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        chmod +x ${{ github.action_path }}/main.sh
+        ${{ github.action_path }}/main.sh

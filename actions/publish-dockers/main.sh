@@ -37,10 +37,7 @@ cd $TMPDIR
 uv venv -p python3.10
 source .venv/bin/activate
 
-uv pip install --index-url https://test.pypi.org/simple/ \
-  --extra-index-url https://pypi.org/simple \
-  --index-strategy unsafe-best-match \
-  llama-stack==${VERSION}
+uv pip install https://github.com/meta-llama/llama-stack/archive/refs/heads/main.zip
 
 which llama
 llama stack list-apis

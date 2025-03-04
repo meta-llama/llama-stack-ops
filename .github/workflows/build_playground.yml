@@ -28,6 +28,10 @@ jobs:
           token: ${{ secrets.LLAMA_STACK_REPO_TOKEN }}
           path: configs
           ref: main # May wan to make this an input in the future
+      - name: Print Directory
+        run: ls -R
+      
+      
 
       - name: Login to Image Registry
         uses: docker/login-action@v3

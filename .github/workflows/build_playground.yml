@@ -26,7 +26,6 @@ jobs:
         with:
           repository: jland-redhat/llama-stack #TODO: Change This
           token: ${{ secrets.LLAMA_STACK_REPO_TOKEN }}
-          path: configs
           ref: main # May wan to make this an input in the future
       - name: Print Directory
         run: ls -R
@@ -47,5 +46,5 @@ jobs:
           context: ./llama_stack/distribution/ui/
           file: ./llama_stack/distribution/ui/Containerfile
           push: true
-          tags: ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}, ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }}
+          tags: ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ inputs.version }}, ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }}
           ulimit: nofile=4096

@@ -70,10 +70,12 @@ git checkout -b cut-${VERSION} refs/tags/v${VERSION}
 
 # Client-SDK uses Fireworks
 TEMPLATE=fireworks
-echo "Running client-sdk tests"
-cd tests/client-sdk
-LLAMA_STACK_CONFIG=$TEMPLATE pytest -s -v . \
+echo "Running integration tests"
+pytest -s -v tests/integration/ \
+  --stack-config $TEMPLATE \
   -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
+  --text-model meta-llama/Llama-3.1-8B-Instruct \
+  --vision-model meta-llama/Llama-3.2-11B-Vision-Instruct \
   --safety-shield meta-llama/Llama-Guard-3-8B \
   --embedding-model all-MiniLM-L6-v2
 

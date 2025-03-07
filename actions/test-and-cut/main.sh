@@ -85,6 +85,18 @@ test_llama_cli() {
   llama stack list-providers telemetry
 }
 
+run_integration_tests() {
+  stack_config=$1
+  shift
+  pytest -s -v llama-stack/tests/integration/ \
+    --stack-config $stack_config \
+    -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
+    --text-model meta-llama/Llama-3.1-8B-Instruct \
+    --vision-model meta-llama/Llama-3.2-11B-Vision-Instruct \
+    --safety-shield meta-llama/Llama-Guard-3-8B \
+    --embedding-model all-MiniLM-L6-v2
+}
+
 test_library_client() {
   echo "Building template"
   SCRIPT_FILE=$(mktemp)
@@ -96,11 +108,8 @@ test_library_client() {
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE
 
-  echo "Running client-sdk tests before uploading"
-  LLAMA_STACK_CONFIG=$TEMPLATE pytest -s -v llama-stack/tests/client-sdk/ \
-    -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
-    --safety-shield meta-llama/Llama-Guard-3-8B \
-    --embedding-model all-MiniLM-L6-v2
+  echo "Running integration tests before uploading"
+  run_integration_tests $TEMPLATE
 }
 
 test_docker() {
@@ -140,10 +149,7 @@ test_docker() {
     fi
   done
 
-  LLAMA_STACK_BASE_URL=http://localhost:$LLAMA_STACK_PORT pytest -s -v llama-stack/tests/client-sdk/ \
-    -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
-    --safety-shield meta-llama/Llama-Guard-3-8B \
-    --embedding-model all-MiniLM-L6-v2
+  run_integration_tests http://localhost:$LLAMA_STACK_PORT
 
   # stop the container
   docker stop llama-stack-$TEMPLATE

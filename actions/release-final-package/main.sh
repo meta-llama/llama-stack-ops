@@ -70,6 +70,25 @@ source .venv/bin/activate
 
 uv pip install twine
 
+add_bump_version_commit() {
+  local repo=$1
+  local version=$2
+
+  # TODO: this is dangerous use uvx toml-cli toml set project.version $RELEASE_VERSION instead of this
+  # cringe perl code
+  perl -pi -e "s/version = .*$/version = \"$version\"/" pyproject.toml
+
+  if ! is_truthy "$LLAMA_STACK_ONLY"; then
+    perl -pi -e "s/llama-stack-client>=.*,/llama-stack-client>=$RELEASE_VERSION\",/" pyproject.toml
+
+    if [ -f "src/llama_stack_client/_version.py" ]; then
+      perl -pi -e "s/__version__ = .*$/__version__ = \"$version\"/" src/llama_stack_client/_version.py
+    fi
+  fi
+
+  uv export --frozen --no-hashes --no-emit-project --output-file=requirements.txt
+  git commit -a -m "Bump version to $version"
+}
 
 for repo in "${REPOS[@]}"; do
   git clone --depth 10 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
@@ -77,20 +96,8 @@ for repo in "${REPOS[@]}"; do
   git fetch origin refs/tags/v${RC_VERSION}:refs/tags/v${RC_VERSION}
   git checkout -b release-$RELEASE_VERSION refs/tags/v${RC_VERSION}
 
-  # TODO: this is dangerous use uvx toml-cli toml set project.version $RELEASE_VERSION instead of this
-  # cringe perl code
-  perl -pi -e "s/version = .*$/version = \"$RELEASE_VERSION\"/" pyproject.toml
+  add_bump_version_commit $repo $RELEASE_VERSION
 
-  if ! is_truthy "$LLAMA_STACK_ONLY"; then
-    perl -pi -e "s/llama-stack-client>=.*,/llama-stack-client>=$RELEASE_VERSION\",/" pyproject.toml
-
-    if [ -f "src/llama_stack_client/_version.py" ]; then
-      perl -pi -e "s/__version__ = .*$/__version__ = \"$RELEASE_VERSION\"/" src/llama_stack_client/_version.py
-    fi
-  fi
-
-  uv export --frozen --no-hashes --no-emit-project --output-file=requirements.txt
-  git commit -a -m "Bump version to $RELEASE_VERSION" --amend
   git tag -a "v$RELEASE_VERSION" -m "Release version $RELEASE_VERSION"
 
   uv build -q
@@ -142,7 +149,7 @@ for repo in "${REPOS[@]}"; do
     # not quite correct because currently the idea is the LLAMA_STACK_ONLY=1 is set when this is a
     # bugfix release but that's not guaranteed to be true in the future.
     git checkout main
-    git rebase --onto main $(git merge-base main release-$RELEASE_VERSION) release-$RELEASE_VERSION
+    add_bump_version_commit $repo $RELEASE_VERSION
     git push "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git" "main"
   fi
   cd ..

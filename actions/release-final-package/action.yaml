@@ -43,6 +43,7 @@ runs:
         RC_VERSION: ${{ inputs.rc_version }}
         LLAMA_STACK_ONLY: ${{ inputs.llama_stack_only }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        NPM_TOKEN: ${{ inputs.npm_token }}
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh

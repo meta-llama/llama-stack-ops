@@ -35,9 +35,18 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd llama-stack-client-typescript
-          yarn version --new-version ${{ inputs.version }} -m "Bump version to ${{ inputs.version }}" --no-git-tag-version
+          if [[ "${{ inputs.version }}" == *"rc"* ]]; then
+            yarn version --new-version ${{ inputs.version }} -m "Bump version to ${{ inputs.version }}" --no-git-tag-version
+          else
+            yarn version --new-version ${{ inputs.version }} -m "Bump version to ${{ inputs.version }}"
+          fi
           yarn install
           yarn build
           cd dist
-          yarn publish --tag rc --non-interactive --access public
+          if [[ "${{ inputs.version }}" == *"rc"* ]]; then
+            yarn publish --tag rc --non-interactive --access public
+          else
+            yarn publish --non-interactive --access public
+            git commit -a -m "Bump version to ${{ inputs.version }}" --amend
+          fi
           cd ..

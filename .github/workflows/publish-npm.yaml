@@ -1,12 +1,12 @@
 name: Publish Package to NPM
 
 on:
-#   release:
-#     types: [created]
-#   # Optionally, you can also trigger this workflow manually
-#   workflow_dispatch:
-  push:
-
+  workflow_dispatch:  # Keep manual trigger
+    inputs:
+      version:
+        description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
+        required: true
+        type: string
 
 jobs:
   build-and-publish:
@@ -35,7 +35,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd llama-stack-client-typescript
-          yarn version --new-version 0.1.6rc2 -m "Bump version to 0.1.6rc2" --no-git-tag-version
+          yarn version --new-version ${{ inputs.version }} -m "Bump version to ${{ inputs.version }}" --no-git-tag-version
           yarn install
           yarn build
           cd dist

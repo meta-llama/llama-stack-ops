@@ -47,6 +47,9 @@ jobs:
             yarn publish --tag rc --non-interactive --access public
           else
             yarn publish --non-interactive --access public
+            git config --global user.email "github-actions@github.com"
+            git config --global user.name "GitHub Actions"
             git commit -a -m "Bump version to ${{ inputs.version }}" --amend
+            git push origin HEAD:main --force
           fi
           cd ..

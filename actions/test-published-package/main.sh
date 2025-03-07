@@ -25,6 +25,7 @@ while [ $attempt -le $max_attempts ]; do
   echo "Attempt $attempt of $max_attempts to install package..."
   if uv pip install --no-cache \
     --index-strategy unsafe-best-match \
+    --prerelease=allow \
     --index-url https://pypi.org/simple/ \
     --extra-index-url https://test.pypi.org/simple/ \
     llama-stack==${VERSION}; then

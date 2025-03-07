@@ -1,0 +1,42 @@
+name: Publish Package to NPM
+
+on:
+#   release:
+#     types: [created]
+#   # Optionally, you can also trigger this workflow manually
+#   workflow_dispatch:
+  push:
+
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: meta-llama/llama-stack-client-typescript  # Replace with the actual owner/repo-name
+          path: ./llama-stack-client-typescript
+          token: ${{ secrets.LLAMA_REPOS_PAT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Build and Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd llama-stack-client-typescript
+          yarn version --new-version 0.1.6rc2 -m "Bump version to 0.1.6rc2" --no-git-tag-version
+          yarn install
+          yarn build
+          cd dist
+          yarn publish --tag rc --non-interactive --access public
+          cd ..

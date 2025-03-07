@@ -13,7 +13,7 @@ on:
         type: string
 
 jobs:
-  publish-to-pypi:
+  publish-to-pypi-and-npm:
     runs-on: ubuntu-latest
     environment:
       name: release
@@ -32,7 +32,7 @@ jobs:
 
   test-published-package:
     needs:
-      - publish-to-pypi
+      - publish-to-pypi-and-npm
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

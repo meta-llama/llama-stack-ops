@@ -78,6 +78,16 @@ for repo in models stack-client-python stack; do
   cd ..
 done
 
+# update typescript package versions
+git clone --depth 10 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-stack-client-typescript.git"
+cd llama-stack-client-typescript
+yarn version --new-version $RELEASE_VERSION -m "Bump version to $RELEASE_VERSION"
+yarn install
+yarn build
+yarn publish --non-interactive
+git commit -a -m "Bump version to $RELEASE_VERSION" --amend
+cd ..
+
 # TODO: This is too slow right now; skipping for now
 # 
 # git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-stack-apps.git"
@@ -104,7 +114,7 @@ for repo in models stack-client-python stack; do
     "llama-$repo/dist/*.whl" "llama-$repo/dist/*.tar.gz"
 done
 
-for repo in models stack-client-python stack; do
+for repo in models stack-client-python stack stack-client-typescript; do
   cd llama-$repo
 
   # push the new commit to main and push the tag

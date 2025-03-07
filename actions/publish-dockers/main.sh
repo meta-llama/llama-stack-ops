@@ -22,7 +22,7 @@ release_exists() {
 
 if release_exists "test.pypi"; then
   echo "Version $VERSION found in test.pypi"
-  PYPI_SOURCE="testpypi" 
+  PYPI_SOURCE="testpypi"
 elif release_exists "pypi"; then
   echo "Version $VERSION found in pypi"
   PYPI_SOURCE="pypi"
@@ -40,7 +40,7 @@ source .venv/bin/activate
 uv pip install --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple \
   --index-strategy unsafe-best-match \
-  llama-stack==${VERSION} llama-models==${VERSION} llama-stack-client==${VERSION}
+  llama-stack==${VERSION}
 
 which llama
 llama stack list-apis

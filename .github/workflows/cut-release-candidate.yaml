@@ -11,6 +11,11 @@ on:
         description: 'Commit ID for "cut" (default: origin/main)'
         required: false
         type: string
+      llama_stack_only:
+        description: 'Only cut a llama-stack release candidate (default: false)'
+        required: false
+        type: boolean
+        default: false
 #  schedule:
 #    - cron: "0 0 * * *"  # Run every day at midnight
 
@@ -27,12 +32,13 @@ jobs:
       with:
         version: ${{ inputs.version }}
         commit_id: ${{ inputs.commit_id }}
+        llama_stack_only: ${{ inputs.llama_stack_only }}
         fireworks_api_key: ${{ secrets.FIREWORKS_API_KEY }}
         together_api_key: ${{ secrets.TOGETHER_API_KEY }}
         tavily_search_api_key: ${{ secrets.TAVILY_SEARCH_API_KEY }}
-        # TODO: this will expire in 90 days; we should figure out a 
+        # TODO: this will expire in 90 days; we should figure out a
         # GitHub App setup that can be used instead
-        github_token: ${{ secrets.LLAMA_REPOS_PAT }}        
+        github_token: ${{ secrets.LLAMA_REPOS_PAT }}
 
   upload-packages-and-tag:
     needs:
@@ -48,9 +54,10 @@ jobs:
     - uses: ./actions/upload-packages-and-tag
       with:
         version: ${{ inputs.version }}
-        # TODO: this will expire in 90 days; we should figure out a 
+        llama_stack_only: ${{ inputs.llama_stack_only }}
+        # TODO: this will expire in 90 days; we should figure out a
         # GitHub App setup that can be used instead
-        github_token: ${{ secrets.LLAMA_REPOS_PAT }}        
+        github_token: ${{ secrets.LLAMA_REPOS_PAT }}
 
   test-published-package:
     needs:

@@ -10,6 +10,8 @@ repos:
     -   id: check-merge-conflict
     -   id: check-added-large-files
         args: ['--maxkb=1000']
+    -   id: trailing-whitespace
+        exclude: '\.py$'  # Exclude Python files as Ruff already handles them
     -   id: end-of-file-fixer
         exclude: '^(.*\.svg)$'
 

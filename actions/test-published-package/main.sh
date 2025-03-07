@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$VERSION" ]; then
-  echo "You must set the VERSION environment variable" >&2 
+  echo "You must set the VERSION environment variable" >&2
   exit 1
 fi
 
@@ -25,9 +25,10 @@ while [ $attempt -le $max_attempts ]; do
   echo "Attempt $attempt of $max_attempts to install package..."
   if uv pip install --no-cache \
     --index-strategy unsafe-best-match \
+    --prerelease=allow \
     --index-url https://pypi.org/simple/ \
     --extra-index-url https://test.pypi.org/simple/ \
-    llama-stack==${VERSION} llama-models==${VERSION} llama-stack-client==${VERSION}; then
+    llama-stack==${VERSION}; then
     echo "Package installed successfully"
     break
   fi
@@ -70,17 +71,19 @@ git checkout -b cut-${VERSION} refs/tags/v${VERSION}
 
 # Client-SDK uses Fireworks
 TEMPLATE=fireworks
-echo "Running client-sdk tests"
-cd tests/client-sdk
-LLAMA_STACK_CONFIG=$TEMPLATE pytest -s -v . \
+echo "Running integration tests"
+pytest -s -v tests/integration/ \
+  --stack-config $TEMPLATE \
   -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
+  --text-model meta-llama/Llama-3.1-8B-Instruct \
+  --vision-model meta-llama/Llama-3.2-11B-Vision-Instruct \
   --safety-shield meta-llama/Llama-Guard-3-8B \
   --embedding-model all-MiniLM-L6-v2
 
 # Notebook tests use Together
 echo "Running notebook tests"
 
-# very important to _not_ run from the llama-stack repo otherwise you 
+# very important to _not_ run from the llama-stack repo otherwise you
 # won't pick up the installed version of the package
 cd $TMPDIR
 pytest -v -s --nbval-lax ./llama-stack/docs/getting_started.ipynb

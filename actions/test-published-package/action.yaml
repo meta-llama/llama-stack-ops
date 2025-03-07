@@ -39,10 +39,3 @@ runs:
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh
-
-# Example usage in workflow:
-# - uses: meta-llama/llama-stack-ops/actions/upload-test-packages@main
-#   with:
-#     version: 0.1.1rc2
-#     branch: main
-#     pypi_token: ${{ secrets.PYPI_TOKEN }}

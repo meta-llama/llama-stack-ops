@@ -6,6 +6,10 @@ inputs:
   github_token:
     description: 'Personal Access Token (PAT) with access to all llama repositories'
     required: true
+  llama_stack_only:
+    description: 'Only upload packages for llama-stack (default: false)'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -29,6 +33,7 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        LLAMA_STACK_ONLY: ${{ inputs.llama_stack_only }}
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh

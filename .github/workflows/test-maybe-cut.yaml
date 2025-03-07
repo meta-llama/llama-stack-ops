@@ -10,8 +10,8 @@ on:
         description: 'Version (e.g. 0.1.1rc2); if optional, will not cut a branch'
         required: false
         type: string
-#  schedule:
-#    - cron: "0 0 * * *"  # Run every day at midnight
+  schedule:
+    - cron: "0 0 * * *"  # Run every day at midnight
 
 jobs:
   test-and-maybe-cut:
@@ -22,25 +22,36 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v4
+    - name: Set commit ID and version for scheduled runs
+      id: inputs
+      run: |
+        if [[ "${{ github.event_name }}" == "schedule" ]]; then
+          echo "commit_id=origin/main" >> $GITHUB_OUTPUT
+          echo "version=" >> $GITHUB_OUTPUT
+        else
+          echo "commit_id=${{ inputs.commit_id }}" >> $GITHUB_OUTPUT
+          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
     - name: Set version if not provided
       id: version
       run: |
-        if [ -z "${{ inputs.version }}" ]; then
+        if [ -z "${{ steps.inputs.outputs.version }}" ]; then
           echo "value=0.0.0.dev$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
           echo "only_test=true" >> $GITHUB_OUTPUT
         else
-          echo "value=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          echo "value=${{ steps.inputs.outputs.version }}" >> $GITHUB_OUTPUT
           echo "only_test=false" >> $GITHUB_OUTPUT
         fi
       shell: bash
     - uses: ./actions/test-and-cut
       with:
         version: ${{ steps.version.outputs.value }}
-        commit_id: ${{ inputs.commit_id }}
+        commit_id: ${{ steps.inputs.outputs.commit_id }}
         only_test_dont_cut: ${{ steps.version.outputs.only_test }}
         fireworks_api_key: ${{ secrets.FIREWORKS_API_KEY }}
         together_api_key: ${{ secrets.TOGETHER_API_KEY }}
         tavily_search_api_key: ${{ secrets.TAVILY_SEARCH_API_KEY }}
-        # TODO: this will expire in 90 days; we should figure out a 
+        # TODO: this will expire in 90 days; we should figure out a
         # GitHub App setup that can be used instead
-        github_token: ${{ secrets.LLAMA_REPOS_PAT }}        
+        github_token: ${{ secrets.LLAMA_REPOS_PAT }}

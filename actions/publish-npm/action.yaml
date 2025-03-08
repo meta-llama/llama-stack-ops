@@ -1,0 +1,47 @@
+name: Publish Package to NPM
+
+on:
+  workflow_dispatch:  # Keep manual trigger
+    inputs:
+      version:
+        description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
+        required: true
+        type: string
+      npm_token:
+        description: 'NPM token'
+        required: true
+        type: string
+      github_token:
+        description: 'Personal Access Token (PAT) with access to all llama repositories'
+        required: true
+        type: string
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: meta-llama/llama-stack-client-typescript  # Replace with the actual owner/repo-name
+          path: ./llama-stack-client-typescript
+          token: ${{ inputs.github_token }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+          cache-dependency-path: './llama-stack-client-typescript/yarn.lock'
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Build and Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ inputs.npm_token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          chmod +x ${{ github.action_path }}/main.sh
+          ${{ github.action_path }}/main.sh

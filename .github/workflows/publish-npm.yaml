@@ -1,12 +1,13 @@
 name: Publish Package to NPM
 
 on:
-  workflow_dispatch:  # Keep manual trigger
-    inputs:
-      version:
-        description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
-        required: true
-        type: string
+  # workflow_dispatch:  # Keep manual trigger
+  #   inputs:
+  #     version:
+  #       description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
+  #       required: true
+  #       type: string
+  push:
 
 jobs:
   build-and-publish:
@@ -14,42 +15,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        
+      - name: Publish to NPM
+        uses: ./actions/publish-npm
         with:
-          repository: meta-llama/llama-stack-client-typescript  # Replace with the actual owner/repo-name
-          path: ./llama-stack-client-typescript
-          token: ${{ secrets.LLAMA_REPOS_PAT }}
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
-          cache-dependency-path: './llama-stack-client-typescript/yarn.lock'
-
-      - name: Install Yarn
-        run: npm install -g yarn
-
-      - name: Build and Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          cd llama-stack-client-typescript
-          if [[ "${{ inputs.version }}" == *"rc"* ]]; then
-            yarn version --new-version ${{ inputs.version }} -m "Bump version to ${{ inputs.version }}" --no-git-tag-version
-          else
-            yarn version --new-version ${{ inputs.version }} -m "Bump version to ${{ inputs.version }}"
-          fi
-          yarn install
-          yarn build
-          cd dist
-          if [[ "${{ inputs.version }}" == *"rc"* ]]; then
-            yarn publish --tag rc --non-interactive --access public
-          else
-            yarn publish --non-interactive --access public
-            git config --global user.email "github-actions@github.com"
-            git config --global user.name "GitHub Actions"
-            git commit -a -m "Bump version to ${{ inputs.version }}" --amend
-            git push origin HEAD:main --force
-          fi
-          cd ..
+          version: 0.1.6rc2
+          npm_token: ${{ secrets.NPM_TOKEN }}
+          github_token: ${{ secrets.LLAMA_REPOS_PAT }}

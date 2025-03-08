@@ -33,9 +33,11 @@ runs:
         cache-dependency-path: './llama-stack-client-typescript/yarn.lock'
 
     - name: Install Yarn
+      shell: bash
       run: npm install -g yarn
 
     - name: Build and Publish
+      shell: bash
       env:
         NODE_AUTH_TOKEN: ${{ inputs.npm_token }}
         VERSION: ${{ inputs.version }}

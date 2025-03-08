@@ -19,6 +19,6 @@ jobs:
       - name: Publish to NPM
         uses: ./actions/publish-npm
         with:
-          version: 0.1.6rc2
+          version: 0.1.6rc3
           npm_token: ${{ secrets.NPM_TOKEN }}
           github_token: ${{ secrets.LLAMA_REPOS_PAT }}

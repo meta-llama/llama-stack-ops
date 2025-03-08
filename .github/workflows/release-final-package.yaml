@@ -1,4 +1,4 @@
-name: Release final package to PyPI
+name: Release[2/2] Release final package to PyPI
 
 on:
   workflow_dispatch:  # Keep manual trigger

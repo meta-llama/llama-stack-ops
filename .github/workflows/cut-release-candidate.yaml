@@ -1,4 +1,4 @@
-name: Cut a Release Candidate
+name: Release[1/2]Cut a Release Candidate
 
 on:
   workflow_dispatch:

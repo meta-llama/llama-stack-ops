@@ -1,13 +1,12 @@
 name: Publish Package to NPM
 
 on:
-  # workflow_dispatch:  # Keep manual trigger
-  #   inputs:
-  #     version:
-  #       description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
-  #       required: true
-  #       type: string
-  push:
+  workflow_dispatch:  # Keep manual trigger
+    inputs:
+      version:
+        description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
+        required: true
+        type: string
 
 jobs:
   build-and-publish:
@@ -19,6 +18,6 @@ jobs:
       - name: Publish to NPM
         uses: ./actions/publish-npm
         with:
-          version: 0.1.6rc3
+          version: ${{ inputs.version }}
           npm_token: ${{ secrets.NPM_TOKEN }}
           github_token: ${{ secrets.LLAMA_REPOS_PAT }}

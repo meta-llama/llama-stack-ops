@@ -17,6 +17,6 @@ else
   git config --global user.email "github-actions@github.com"
   git config --global user.name "GitHub Actions"
   git commit -a -m "Bump version to $VERSION" --amend
-  git push origin HEAD:main --force
+  git push
 fi
 cd ..

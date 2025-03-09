@@ -1,0 +1,23 @@
+name: Publish Package to NPM
+
+on:
+  workflow_dispatch:  # Keep manual trigger
+    inputs:
+      version:
+        description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
+        required: true
+        type: string
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Publish to NPM
+        uses: ./actions/publish-npm
+        with:
+          version: ${{ inputs.version }}
+          npm_token: ${{ secrets.NPM_TOKEN }}
+          github_token: ${{ secrets.LLAMA_REPOS_PAT }}

@@ -1,4 +1,4 @@
-name: Release final package to PyPI
+name: Release[2/2] Release final package to PyPI
 
 on:
   workflow_dispatch:  # Keep manual trigger
@@ -11,6 +11,11 @@ on:
         description: 'RC version which should be used as the base for this release (e.g. 0.1.1rc2)'
         required: true
         type: string
+      llama_stack_only:
+        description: 'Only release llama-stack (default: false)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   publish-to-pypi:
@@ -26,9 +31,10 @@ jobs:
       with:
         release_version: ${{ inputs.release_version }}
         rc_version: ${{ inputs.rc_version }}
-        # TODO: this will expire in 90 days; we should figure out a 
+        llama_stack_only: ${{ inputs.llama_stack_only }}
+        # TODO: this will expire in 90 days; we should figure out a
         # GitHub App setup that can be used instead
-        github_token: ${{ secrets.LLAMA_REPOS_PAT }}        
+        github_token: ${{ secrets.LLAMA_REPOS_PAT }}
 
   test-published-package:
     needs:

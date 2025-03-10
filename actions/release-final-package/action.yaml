@@ -7,6 +7,10 @@ inputs:
   rc_version:
     description: 'Release candidate version which will be used to build the final package'
     required: true
+  llama_stack_only:
+    description: 'Only release llama-stack (default: false)'
+    required: false
+    default: 'false'
   github_token:
     description: 'GitHub token to use for the release'
     required: true
@@ -37,6 +41,7 @@ runs:
       env:
         RELEASE_VERSION: ${{ inputs.release_version }}
         RC_VERSION: ${{ inputs.rc_version }}
+        LLAMA_STACK_ONLY: ${{ inputs.llama_stack_only }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
         chmod +x ${{ github.action_path }}/main.sh

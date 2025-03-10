@@ -6,11 +6,20 @@ if [ -z "$VERSION" ]; then
 fi
 
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
+LLAMA_STACK_ONLY=${LLAMA_STACK_ONLY:-false}
 
 TEMPLATE=fireworks
 
 set -euo pipefail
 set -x
+
+is_truthy() {
+  case "$1" in
+    true|1) return 0 ;;
+    false|0) return 1 ;;
+    *) return 1 ;;
+  esac
+}
 
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
@@ -20,7 +29,11 @@ source .venv/bin/activate
 
 uv pip install twine
 
-REPOS=(models stack-client-python stack)
+REPOS=(stack-client-python stack)
+if is_truthy "$LLAMA_STACK_ONLY"; then
+  REPOS=(stack)
+fi
+
 for repo in "${REPOS[@]}"; do
   git clone --depth 10 "https://x-access-token:${GITHUB_TOKEN}@github.com/meta-llama/llama-$repo.git"
   cd llama-$repo

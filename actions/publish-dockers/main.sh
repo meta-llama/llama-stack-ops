@@ -14,7 +14,6 @@ fi
 
 set -euo pipefail
 
-# Common setup for both scripts
 if [ "$IS_NIGHTLY" = true ]; then
   cd llama-stack
 fi

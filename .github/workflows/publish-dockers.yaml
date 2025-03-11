@@ -2,7 +2,7 @@ name: Publish Docker images
 
 on:
   schedule:
-    - cron: '45 23 * * *'  # Every day at 11:45
+    - cron: '45 23 * * *'  # Every day at 11:45 UTC
   workflow_dispatch:  # Keep manual trigger
     inputs:
       version:

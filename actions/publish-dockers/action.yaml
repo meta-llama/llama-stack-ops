@@ -37,7 +37,7 @@ runs:
 
     - name: Pull the main branch of llama-stack
       if: startsWith(github.event.inputs.version, 'nightly-')
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: 'main'
         repository: 'meta-llama/llama-stack'

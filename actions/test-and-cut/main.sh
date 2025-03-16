@@ -9,6 +9,12 @@ if [ -z "${COMMIT_ID+x}" ]; then
   exit 1
 fi
 
+if [ -z "${CLIENT_PYTHON_COMMIT_ID+x}" ]; then
+  echo "You must set the CLIENT_PYTHON_COMMIT_ID environment variable" >&2
+  exit 1
+fi
+
+
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
 ONLY_TEST_DONT_CUT=${ONLY_TEST_DONT_CUT:-false}
 LLAMA_STACK_ONLY=${LLAMA_STACK_ONLY:-false}
@@ -49,6 +55,10 @@ build_packages() {
       git fetch origin "$REF"
 
       # Use FETCH_HEAD which is where the fetched commit is stored
+      git checkout -b "rc-$VERSION" FETCH_HEAD
+    elif [ "$repo" == "stack-client-python" ] && [ -n "$CLIENT_PYTHON_COMMIT_ID" ]; then
+      REF="${CLIENT_PYTHON_COMMIT_ID#origin/}"
+      git fetch origin "$REF"
       git checkout -b "rc-$VERSION" FETCH_HEAD
     else
       git checkout -b "rc-$VERSION"

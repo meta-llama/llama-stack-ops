@@ -6,6 +6,11 @@ on:
       commit_id:
         description: 'Commit ID to test at'
         required: true
+      client_python_commit_id:
+        description: 'llama-stack-client-python commit ID to test at'
+        required: false
+        type: string
+        default: 'origin/main'
       version:
         description: 'Version (e.g. 0.1.1rc2); if optional, will not cut a branch'
         required: false
@@ -33,9 +38,11 @@ jobs:
         if [[ "${{ github.event_name }}" == "schedule" ]]; then
           echo "commit_id=origin/main" >> $GITHUB_OUTPUT
           echo "version=" >> $GITHUB_OUTPUT
+          echo "client_python_commit_id=origin/main" >> $GITHUB_OUTPUT
         else
           echo "commit_id=${{ inputs.commit_id }}" >> $GITHUB_OUTPUT
           echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          echo "client_python_commit_id=${{ inputs.client_python_commit_id }}" >> $GITHUB_OUTPUT
         fi
       shell: bash
     - name: Set version if not provided
@@ -53,6 +60,7 @@ jobs:
       with:
         version: ${{ steps.version.outputs.value }}
         commit_id: ${{ steps.inputs.outputs.commit_id }}
+        client_python_commit_id: ${{ steps.inputs.outputs.client_python_commit_id }}
         template: ${{ inputs.template }}
         only_test_dont_cut: ${{ steps.version.outputs.only_test }}
         fireworks_api_key: ${{ secrets.FIREWORKS_API_KEY }}

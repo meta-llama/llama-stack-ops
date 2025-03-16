@@ -8,6 +8,10 @@ inputs:
     description: 'Commit ID for "cut" (default: origin/main)'
     required: false
     default: ''
+  client_python_commit_id:
+    description: 'llama-stack-client-python commit ID for "cut" (default: origin/main)'
+    required: false
+    default: ''
   only_test_dont_cut:
     description: 'Do not cut a branch, only run tests (default: false)'
     required: false
@@ -63,6 +67,7 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
         COMMIT_ID: ${{ inputs.commit_id }}
+        CLIENT_PYTHON_COMMIT_ID: ${{ inputs.client_python_commit_id }}
         TEMPLATE: ${{ inputs.template }}
         ONLY_TEST_DONT_CUT: ${{ inputs.only_test_dont_cut }}
         LLAMA_STACK_ONLY: ${{ inputs.llama_stack_only }}

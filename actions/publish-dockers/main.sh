@@ -75,8 +75,9 @@ build_and_push_docker() {
 
   echo "Pushing docker image"
   if [ "$IS_NIGHTLY" = true ]; then
-    docker tag distribution-$template:dev llamastack/distribution-$template:${VERSION}
-    docker push llamastack/distribution-$template:${VERSION}
+    COMMIT=$(git rev-parse --short HEAD)
+    docker tag distribution-$template:dev llamastack/distribution-$template:${VERSION}-${COMMIT}
+    docker push llamastack/distribution-$template:${VERSION}-${COMMIT}
   else
     if [ "$PYPI_SOURCE" = "testpypi" ]; then
       docker tag distribution-$template:test-${VERSION} llamastack/distribution-$template:test-${VERSION}

@@ -98,7 +98,7 @@ run_integration_tests() {
   LLAMA_STACK_TEST_INTERVAL_SECONDS=1.25 pytest -s -v llama-stack/tests/integration/ \
     --stack-config $stack_config \
     -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
-    --text-model meta-llama/Llama-3.1-8B-Instruct \
+    --text-model meta-llama/Llama-3.3-70B-Instruct \
     --vision-model meta-llama/Llama-3.2-11B-Vision-Instruct \
     --safety-shield meta-llama/Llama-Guard-3-8B \
     --embedding-model all-MiniLM-L6-v2

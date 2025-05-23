@@ -5,15 +5,23 @@ inputs:
     description: 'Version of the package to publish'
     required: true
   commit_id:
-    description: 'Commit ID for "cut" (default: origin/main)'
+    description: 'Commit ID for cut'
     required: false
-    default: ''
-  only_test_dont_cut:
-    description: 'Do not cut a branch, only run tests (default: false)'
+    default: 'origin/main'
+  client_python_commit_id:
+    description: 'llama-stack-client-python commit ID for "cut"'
     required: false
-    default: 'false'
+    default: 'origin/main'
+  cut_mode:
+    description: 'Mode to run the script in (test-and-cut, test-only, cut-only)'
+    required: false
+    default: 'test-and-cut'
+  template:
+    description: '--stack-config for testing'
+    required: false
+    default: 'fireworks'
   llama_stack_only:
-    description: 'Only cut a llama-stack release candidate (default: false)'
+    description: 'Only cut a llama-stack release candidate'
     required: false
     default: 'false'
   fireworks_api_key:
@@ -35,13 +43,19 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - uses: astral-sh/setup-uv@v5
+    - uses: astral-sh/setup-uv@v6
       with:
         python-version: '3.10'
         enable-cache: false
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
       shell: bash
@@ -59,7 +73,9 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
         COMMIT_ID: ${{ inputs.commit_id }}
-        ONLY_TEST_DONT_CUT: ${{ inputs.only_test_dont_cut }}
+        CLIENT_PYTHON_COMMIT_ID: ${{ inputs.client_python_commit_id }}
+        TEMPLATE: ${{ inputs.template }}
+        CUT_MODE: ${{ inputs.cut_mode }}
         LLAMA_STACK_ONLY: ${{ inputs.llama_stack_only }}
         TOGETHER_API_KEY: ${{ inputs.together_api_key }}
         TAVILY_SEARCH_API_KEY: ${{ inputs.tavily_search_api_key }}

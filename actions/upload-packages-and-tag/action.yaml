@@ -10,6 +10,9 @@ inputs:
     description: 'Only upload packages for llama-stack (default: false)'
     required: false
     default: 'false'
+  npm_token:
+    description: 'NPM token'
+    required: true
 
 runs:
   using: 'composite'
@@ -17,10 +20,14 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - uses: astral-sh/setup-uv@v5
+    - uses: astral-sh/setup-uv@v6
       with:
         python-version: '3.10'
         enable-cache: false
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Configure Git
       shell: bash
@@ -34,6 +41,7 @@ runs:
         VERSION: ${{ inputs.version }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
         LLAMA_STACK_ONLY: ${{ inputs.llama_stack_only }}
+        NPM_TOKEN: ${{ inputs.npm_token }}
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh

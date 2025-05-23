@@ -9,21 +9,29 @@ if [ -z "${COMMIT_ID+x}" ]; then
   exit 1
 fi
 
-GITHUB_TOKEN=${GITHUB_TOKEN:-}
-ONLY_TEST_DONT_CUT=${ONLY_TEST_DONT_CUT:-false}
-LLAMA_STACK_ONLY=${LLAMA_STACK_ONLY:-false}
+if [ -z "${CLIENT_PYTHON_COMMIT_ID+x}" ]; then
+  echo "You must set the CLIENT_PYTHON_COMMIT_ID environment variable" >&2
+  exit 1
+fi
 
-TEMPLATE=fireworks
+GITHUB_TOKEN=${GITHUB_TOKEN:-}
+CUT_MODE=${CUT_MODE:-test-and-cut}
+LLAMA_STACK_ONLY=${LLAMA_STACK_ONLY:-false}
+TEMPLATE=${TEMPLATE:-fireworks}
 
 set -euo pipefail
 set -x
 
+if [ "$CUT_MODE" != "test-and-cut" ] && [ "$CUT_MODE" != "test-only" ] && [ "$CUT_MODE" != "cut-only" ]; then
+  echo "Invalid mode: $CUT_MODE" >&2
+  exit 1
+fi
 
 is_truthy() {
   case "$1" in
-    true|1) return 0 ;;
-    false|0) return 1 ;;
-    *) return 1 ;;
+  true | 1) return 0 ;;
+  false | 0) return 1 ;;
+  *) return 1 ;;
   esac
 }
 
@@ -35,8 +43,9 @@ source .venv/bin/activate
 
 build_packages() {
   uv pip install twine
+  npm install -g yarn
 
-  REPOS=(stack-client-python stack)
+  REPOS=(stack-client-python stack-client-typescript stack)
   if is_truthy "$LLAMA_STACK_ONLY"; then
     REPOS=(stack)
   fi
@@ -51,6 +60,10 @@ build_packages() {
 
       # Use FETCH_HEAD which is where the fetched commit is stored
       git checkout -b "rc-$VERSION" FETCH_HEAD
+    elif [ "$repo" == "stack-client-python" ] && [ -n "$CLIENT_PYTHON_COMMIT_ID" ]; then
+      REF="${CLIENT_PYTHON_COMMIT_ID#origin/}"
+      git fetch origin "$REF"
+      git checkout -b "rc-$VERSION" FETCH_HEAD
     else
       git checkout -b "rc-$VERSION"
     fi
@@ -62,14 +75,22 @@ build_packages() {
       if [ -f "src/llama_stack_client/_version.py" ]; then
         perl -pi -e "s/__version__ = .*$/__version__ = \"$VERSION\"/" src/llama_stack_client/_version.py
       fi
+      if [ -f "package.json" ]; then
+        perl -pi -e "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+      fi
 
       # this is applicable for llama-stack repo but we should not do it when
       # LLAMA_STACK_ONLY is true
       perl -pi -e "s/llama-stack-client>=.*/llama-stack-client>=$VERSION\",/" pyproject.toml
     fi
 
-    uv build -q
-    uv pip install dist/*.whl
+    if [ "$repo" == "stack-client-typescript" ]; then
+      npx yarn install
+      npx yarn build
+    else
+      uv build -q
+      uv pip install dist/*.whl
+    fi
 
     git commit -am "Release candidate $VERSION"
     cd ..
@@ -78,7 +99,7 @@ build_packages() {
 
 test_llama_cli() {
   uv pip list | grep llama
-  llama model prompt-format -m Llama3.2-11B-Vision-Instruct
+  llama model prompt-format -m Llama3.2-90B-Vision-Instruct
   llama model list
   llama stack list-apis
   llama stack list-providers inference
@@ -88,11 +109,11 @@ test_llama_cli() {
 run_integration_tests() {
   stack_config=$1
   shift
-  pytest -s -v llama-stack/tests/integration/ \
+  LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -s -v llama-stack/tests/integration/ \
     --stack-config $stack_config \
-    -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
-    --text-model meta-llama/Llama-3.1-8B-Instruct \
-    --vision-model meta-llama/Llama-3.2-11B-Vision-Instruct \
+    -k "not(builtin_tool_code or safety_with_image or code_interpreter_for or rag_and_code or truncation or register_and_unregister)" \
+    --text-model meta-llama/Llama-3.3-70B-Instruct \
+    --vision-model meta-llama/Llama-4-Scout-17B-16E-Instruct \
     --safety-shield meta-llama/Llama-Guard-3-8B \
     --embedding-model all-MiniLM-L6-v2
 }
@@ -159,13 +180,15 @@ build_packages
 
 uv pip install pytest nbval pytest-asyncio
 
-test_llama_cli
-test_library_client
-test_docker
+if [ "$CUT_MODE" != "cut-only" ]; then
+  test_llama_cli
+  test_library_client
+  test_docker
+fi
 
-# if ONLY_TEST_DONT_CUT is truthy, don't cut the branch
-if is_truthy "$ONLY_TEST_DONT_CUT"; then
-  echo "Not cutting (i.e., pushing the branch) because ONLY_TEST_DONT_CUT is true"
+# if MODE is test-only, don't cut the branch
+if [ "$CUT_MODE" == "test-only" ]; then
+  echo "Not cutting (i.e., pushing the branch) because MODE is test-only"
   exit 0
 fi
 

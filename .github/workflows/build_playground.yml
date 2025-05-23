@@ -1,0 +1,47 @@
+name: "Build and Push Playground Image"
+
+env:
+  IMAGE_NAME: "jland/llama-stack-playground"
+  IMAGE_TAG_LATEST: "latest"
+  REGISTRY_URL: "quay.io" # Replace with your registry URL
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
+        required: true
+        type: string
+
+jobs:
+  #################################
+  #### Deploy Playground Image ####
+  #################################
+  deploy-image:
+    name: Validate and Deploy Playground Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: jland-redhat/llama-stack #TODO: Change This
+          token: ${{ secrets.LLAMA_STACK_REPO_TOKEN }}
+          ref: main # May wan to make this an input in the future
+      
+
+      - name: Login to Image Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ${{ env.REGISTRY_URL }}
+
+      # Build and Push image to registry with tag matching the Git Tag and latest
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./llama_stack/distribution/ui/
+          file: ./llama_stack/distribution/ui/Containerfile
+          push: true
+          tags: ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ inputs.version }}, ${{ env.REGISTRY_URL }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_LATEST }}
+          ulimit: nofile=4096

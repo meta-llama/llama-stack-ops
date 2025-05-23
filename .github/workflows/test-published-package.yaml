@@ -7,6 +7,11 @@ on:
         description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
         required: true
         type: string
+      template:
+        description: 'Template to use for the release candidate (fireworks, together) (default: fireworks)'
+        required: false
+        type: string
+        default: 'fireworks'
 
 jobs:
   test-published-package:
@@ -19,3 +24,4 @@ jobs:
         together_api_key: ${{ secrets.TOGETHER_API_KEY }}
         tavily_search_api_key: ${{ secrets.TAVILY_SEARCH_API_KEY }}
         fireworks_api_key: ${{ secrets.FIREWORKS_API_KEY }}
+        template: ${{ inputs.template }}

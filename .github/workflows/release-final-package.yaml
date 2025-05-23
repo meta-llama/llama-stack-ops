@@ -35,7 +35,7 @@ jobs:
         # TODO: this will expire in 90 days; we should figure out a
         # GitHub App setup that can be used instead
         github_token: ${{ secrets.LLAMA_REPOS_PAT }}
-
+        npm_token: ${{ secrets.NPM_TOKEN }}
   test-published-package:
     needs:
       - publish-to-pypi

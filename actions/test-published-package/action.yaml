@@ -4,6 +4,10 @@ inputs:
   version:
     description: 'Version of the package to test'
     required: true
+  template:
+    description: 'Template to use for the release candidate (fireworks, together) (default: fireworks)'
+    required: false
+    default: 'fireworks'
   fireworks_api_key:
     description: 'Fireworks API key'
     required: true
@@ -20,7 +24,7 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - uses: astral-sh/setup-uv@v5
+    - uses: astral-sh/setup-uv@v6
       with:
         python-version: '3.10'
         enable-cache: false
@@ -33,6 +37,7 @@ runs:
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
+        TEMPLATE: ${{ inputs.template }}
         TOGETHER_API_KEY: ${{ inputs.together_api_key }}
         TAVILY_SEARCH_API_KEY: ${{ inputs.tavily_search_api_key }}
         FIREWORKS_API_KEY: ${{ inputs.fireworks_api_key }}

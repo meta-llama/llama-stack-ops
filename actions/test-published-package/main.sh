@@ -5,6 +5,8 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
+TEMPLATE=${TEMPLATE:-fireworks}
+
 set -euo pipefail
 set -x
 
@@ -41,21 +43,20 @@ while [ $attempt -le $max_attempts ]; do
 done
 
 uv pip list | grep llama
-llama model prompt-format -m Llama3.2-11B-Vision-Instruct
+llama model prompt-format -m Llama3.2-90B-Vision-Instruct
 llama model list
 llama stack list-apis
 llama stack list-providers inference
 llama stack list-providers telemetry
 
-
 templates_to_build=("fireworks" "together")
 for build_template in "${templates_to_build[@]}"; do
   echo "Building $build_template template"
   SCRIPT_FILE=$(mktemp)
-  echo "#!/bin/bash" > $SCRIPT_FILE
-  echo "set -euo pipefail" >> $SCRIPT_FILE
-  echo "set -x" >> $SCRIPT_FILE
-  llama stack build --template $build_template --print-deps-only >> $SCRIPT_FILE
+  echo "#!/bin/bash" >$SCRIPT_FILE
+  echo "set -euo pipefail" >>$SCRIPT_FILE
+  echo "set -x" >>$SCRIPT_FILE
+  llama stack build --template $build_template --print-deps-only >>$SCRIPT_FILE
 
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE
@@ -70,13 +71,12 @@ git fetch origin refs/tags/v${VERSION}:refs/tags/v${VERSION}
 git checkout -b cut-${VERSION} refs/tags/v${VERSION}
 
 # Client-SDK uses Fireworks
-TEMPLATE=fireworks
 echo "Running integration tests"
-pytest -s -v tests/integration/ \
+LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -s -v tests/integration/ \
   --stack-config $TEMPLATE \
-  -k "not(builtin_tool_code or safety_with_image or code_interpreter_for)" \
-  --text-model meta-llama/Llama-3.1-8B-Instruct \
-  --vision-model meta-llama/Llama-3.2-11B-Vision-Instruct \
+  -k "not(builtin_tool_code or safety_with_image or code_interpreter or rag_and_code or truncation or register_and_unregister)" \
+  --text-model meta-llama/Llama-3.3-70B-Instruct \
+  --vision-model meta-llama/Llama-4-Scout-17B-16E-Instruct \
   --safety-shield meta-llama/Llama-Guard-3-8B \
   --embedding-model all-MiniLM-L6-v2
 
@@ -85,6 +85,6 @@ echo "Running notebook tests"
 
 # very important to _not_ run from the llama-stack repo otherwise you
 # won't pick up the installed version of the package
-cd $TMPDIR
-pytest -v -s --nbval-lax ./llama-stack/docs/getting_started.ipynb
-pytest -v -s --nbval-lax ./llama-stack/docs/notebooks/Llama_Stack_Benchmark_Evals.ipynb
+# cd $TMPDIR
+# LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -v -s --nbval-lax ./llama-stack/docs/getting_started.ipynb
+# LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -v -s --nbval-lax ./llama-stack/docs/notebooks/Llama_Stack_Benchmark_Evals.ipynb

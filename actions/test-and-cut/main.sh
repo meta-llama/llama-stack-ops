@@ -126,6 +126,10 @@ test_library_client() {
   echo "set -euo pipefail" >>$SCRIPT_FILE
   llama stack build --template $TEMPLATE --print-deps-only >>$SCRIPT_FILE
 
+  echo "============================="
+  cat $SCRIPT_FILE
+  echo "============================="
+
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE
 

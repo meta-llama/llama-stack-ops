@@ -124,8 +124,8 @@ test_library_client() {
   echo "#!/bin/bash" >$SCRIPT_FILE
   echo "set -x" >>$SCRIPT_FILE
   echo "set -euo pipefail" >>$SCRIPT_FILE
-  LLAMA=`which llama`
-  python -m trace --trace $LLAMA stack build --template $TEMPLATE --print-deps-only >>$SCRIPT_FILE
+  
+  $LLAMA stack build --template $TEMPLATE --print-deps-only --image-type venv >>$SCRIPT_FILE
 
   cat $SCRIPT_FILE
   exit

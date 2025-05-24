@@ -127,6 +127,8 @@ test_library_client() {
   LLAMA=`which llama`
   python -m trace --trace $LLAMA stack build --template $TEMPLATE --print-deps-only >>$SCRIPT_FILE
 
+  cat $SCRIPT_FILE
+  exit
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE
 

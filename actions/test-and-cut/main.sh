@@ -1,11 +1,5 @@
 #!/bin/bash
 
-TEMPLATE=fireworks 
-CUT_MODE=test-and-cut 
-CLIENT_PYTHON_COMMIT_ID=origin/main 
-COMMIT_ID=e9a64682d1f6bbd9a961ff22c0153c9064089be4 
-VERSION=0.2.8rc1
-
 if [ -z "$VERSION" ]; then
   echo "You must set the VERSION environment variable" >&2
   exit 1
@@ -44,7 +38,7 @@ is_truthy() {
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
 
-uv venv -p python3.12
+uv venv -p python3.10
 source .venv/bin/activate
 
 build_packages() {

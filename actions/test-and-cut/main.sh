@@ -121,14 +121,13 @@ run_integration_tests() {
 test_library_client() {
   echo "Building template"
   SCRIPT_FILE=$(mktemp)
+  echo $SCRIPT_FILE
   echo "#!/bin/bash" >$SCRIPT_FILE
   echo "set -x" >>$SCRIPT_FILE
   echo "set -euo pipefail" >>$SCRIPT_FILE
   llama stack build --template $TEMPLATE --print-deps-only >>$SCRIPT_FILE
 
-  echo "============================="
-  cat $SCRIPT_FILE
-  echo "============================="
+
 
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE

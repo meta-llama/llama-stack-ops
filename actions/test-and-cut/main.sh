@@ -1,5 +1,11 @@
 #!/bin/bash
 
+TEMPLATE=fireworks 
+CUT_MODE=test-and-cut 
+CLIENT_PYTHON_COMMIT_ID=origin/main 
+COMMIT_ID=e9a64682d1f6bbd9a961ff22c0153c9064089be4 
+VERSION=0.2.8rc1
+
 if [ -z "$VERSION" ]; then
   echo "You must set the VERSION environment variable" >&2
   exit 1
@@ -38,7 +44,7 @@ is_truthy() {
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
 
-uv venv -p python3.10
+uv venv -p python3.12
 source .venv/bin/activate
 
 build_packages() {
@@ -111,7 +117,7 @@ run_integration_tests() {
   shift
   LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -s -v llama-stack/tests/integration/ \
     --stack-config $stack_config \
-    -k "not(builtin_tool_code or safety_with_image or code_interpreter_for or rag_and_code or truncation or register_and_unregister)" \
+    -k "not(post_train or builtin_tool_code or safety_with_image or code_interpreter_for or rag_and_code or truncation or register_and_unregister)" \
     --text-model meta-llama/Llama-3.3-70B-Instruct \
     --vision-model meta-llama/Llama-4-Scout-17B-16E-Instruct \
     --safety-shield meta-llama/Llama-Guard-3-8B \

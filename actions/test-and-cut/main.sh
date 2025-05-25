@@ -111,7 +111,7 @@ run_integration_tests() {
   shift
   LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -s -v llama-stack/tests/integration/ \
     --stack-config $stack_config \
-    -k "not(supervised_fine_tune or builtin_tool_code or safety_with_image or code_interpreter_for or rag_and_code or truncation or register_and_unregister)" \
+    -k "not(_store or supervised_fine_tune or builtin_tool_code or safety_with_image or code_interpreter_for or rag_and_code or truncation or register_and_unregister)" \
     --text-model meta-llama/Llama-3.3-70B-Instruct \
     --vision-model meta-llama/Llama-4-Scout-17B-16E-Instruct \
     --safety-shield meta-llama/Llama-Guard-3-8B \

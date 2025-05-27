@@ -1,6 +1,8 @@
 name: Publish Docker images
 
 on:
+  schedule:
+    - cron: '45 23 * * *'  # Every day at 11:45 UTC
   workflow_dispatch:  # Keep manual trigger
     inputs:
       version:
@@ -14,6 +16,7 @@ on:
 
 jobs:
   publish-docker-images:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -23,3 +26,18 @@ jobs:
         templates: ${{ inputs.templates }}
         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  publish-nightly-docker-images:
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set version variable
+      id: set_version
+      run: echo "VERSION=nightly-$(date +'%Y%m%d')" >> $GITHUB_ENV
+    - uses: ./actions/publish-dockers
+      with:
+        templates: "ollama, together, fireworks, bedrock, remote-vllm, tgi, meta-reference-gpu"
+        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        version: ${{ env.VERSION }}

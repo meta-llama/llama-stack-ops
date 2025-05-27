@@ -34,6 +34,15 @@ runs:
         username: ${{ inputs.dockerhub_username }}
         password: ${{ inputs.dockerhub_token }}
 
+
+    - name: Pull the main branch of llama-stack
+      if: startsWith(github.event.inputs.version, 'nightly-')
+      uses: actions/checkout@v4
+      with:
+        ref: 'main'
+        repository: 'meta-llama/llama-stack'
+        path: 'llama-stack'
+
     - name: Build and publish
       shell: bash
       env:

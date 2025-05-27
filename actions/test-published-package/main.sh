@@ -56,7 +56,7 @@ for build_template in "${templates_to_build[@]}"; do
   echo "#!/bin/bash" >$SCRIPT_FILE
   echo "set -euo pipefail" >>$SCRIPT_FILE
   echo "set -x" >>$SCRIPT_FILE
-  llama stack build --template $build_template --print-deps-only >>$SCRIPT_FILE
+  llama stack build --template $build_template --print-deps-only --image-type venv >>$SCRIPT_FILE
 
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE

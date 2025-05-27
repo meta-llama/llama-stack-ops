@@ -87,7 +87,10 @@ add_bump_version_commit() {
 
     if ! is_truthy "$LLAMA_STACK_ONLY"; then
       perl -pi -e "s/llama-stack-client>=.*,/llama-stack-client>=$RELEASE_VERSION\",/" pyproject.toml
-      sed -i.bak -E 's/("llama-stack-client": ")[^"]+"/\1'"$RELEASE_VERSION"'"/' llama_stack/ui/package.json
+
+      if [ "$repo" == "stack" ]; then
+        sed -i.bak -E 's/("llama-stack-client": ")[^"]+"/\1'"$RELEASE_VERSION"'"/' llama_stack/ui/package.json
+      fi
 
       if [ -f "src/llama_stack_client/_version.py" ]; then
         perl -pi -e "s/__version__ = .*$/__version__ = \"$version\"/" src/llama_stack_client/_version.py

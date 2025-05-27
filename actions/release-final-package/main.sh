@@ -94,6 +94,10 @@ add_bump_version_commit() {
       fi
     fi
 
+    if [ "$repo" == "stack" ]; then
+      sed -i.bak -E 's/("llama-stack-client": ")[^"]+"/\1'"$RELEASE_VERSION"'"/' llama_stack/ui/package.json
+    fi
+
     if is_truthy "$should_run_uv_lock"; then
       # Retry uv lock as PyPI index might be slow to update
       echo "Attempting to lock dependencies with uv..."

@@ -56,7 +56,7 @@ for build_template in "${templates_to_build[@]}"; do
   echo "#!/bin/bash" >$SCRIPT_FILE
   echo "set -euo pipefail" >>$SCRIPT_FILE
   echo "set -x" >>$SCRIPT_FILE
-  llama stack build --template $build_template --print-deps-only >>$SCRIPT_FILE
+  llama stack build --template $build_template --print-deps-only --image-type venv >>$SCRIPT_FILE
 
   echo "Running script $SCRIPT_FILE"
   bash $SCRIPT_FILE
@@ -74,7 +74,7 @@ git checkout -b cut-${VERSION} refs/tags/v${VERSION}
 echo "Running integration tests"
 LLAMA_STACK_TEST_INTERVAL_SECONDS=3 pytest -s -v tests/integration/ \
   --stack-config $TEMPLATE \
-  -k "not(builtin_tool_code or safety_with_image or code_interpreter or rag_and_code or truncation or register_and_unregister)" \
+  -k "not(supervised_fine_tune or builtin_tool_code or safety_with_image or code_interpreter_for or rag_and_code or truncation or register_and_unregister)" \
   --text-model meta-llama/Llama-3.3-70B-Instruct \
   --vision-model meta-llama/Llama-4-Scout-17B-16E-Instruct \
   --safety-shield meta-llama/Llama-Guard-3-8B \

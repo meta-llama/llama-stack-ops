@@ -1,5 +1,5 @@
-name: 'Publish Docker images'
-description: 'Publish Docker images; PyPI packages must already be published'
+name: 'Publish Docker Manifest Lists'
+description: 'Publish Docker manifest lists; architecture-specific images must already be published'
 inputs:
   version:
     description: 'Version number (e.g. 0.1.1rc2, 0.1.1.dev20250201)'
@@ -22,16 +22,6 @@ inputs:
     required: false
     type: string
     default: llamastack
-  continue_on_error:
-    description: 'Whether to continue or exit when individual templates fail to build'
-    required: false
-    type: string
-    default: false
-  arch:
-    description: Architecture we're building for (amd64 or arm64)
-    required: true
-    type: string
-    default: amd64
 runs:
   using: 'composite'
   steps:
@@ -49,20 +39,12 @@ runs:
         username: ${{ inputs.dockerhub_username }}
         password: ${{ inputs.dockerhub_token }}
 
-    - name: Build and publish
+    - name: Publish manifest lists
       shell: bash
       env:
         VERSION: ${{ inputs.version }}
         TEMPLATES: ${{ inputs.templates }}
         DOCKERHUB_ORGANIZATION: ${{ inputs.dockerhub_organization }}
-        CONTINUE_ON_ERROR: ${{ inputs.continue_on_error }}
-        ARCH: ${{ inputs.arch }}
       run: |
         chmod +x ${{ github.action_path }}/main.sh
         ${{ github.action_path }}/main.sh
-
-# Example usage in workflow:
-# - uses: meta-llama/llama-stack-ops/actions/commit-final-packages@main
-#   with:
-#     version: '1.0.0'
-#     pypi_token: ${{ secrets.PYPI_TOKEN }}

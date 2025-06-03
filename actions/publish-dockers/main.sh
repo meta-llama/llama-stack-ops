@@ -68,7 +68,7 @@ build_and_push_docker() {
 }
 
 if [ -z "$TEMPLATES" ]; then
-  TEMPLATES=(starter ollama together fireworks tgi meta-reference-gpu)
+  TEMPLATES=(starter tgi meta-reference-gpu)
 else
   TEMPLATES=(${TEMPLATES//,/ })
 fi

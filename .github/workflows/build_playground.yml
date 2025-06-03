@@ -27,7 +27,7 @@ jobs:
           repository: jland-redhat/llama-stack #TODO: Change This
           token: ${{ secrets.LLAMA_STACK_REPO_TOKEN }}
           ref: main # May wan to make this an input in the future
-      
+
 
       - name: Login to Image Registry
         uses: docker/login-action@v3

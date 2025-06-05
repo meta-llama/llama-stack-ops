@@ -68,7 +68,7 @@ build_and_push_docker() {
 }
 
 if [ -z "$TEMPLATES" ]; then
-  TEMPLATES=(starter tgi meta-reference-gpu)
+  TEMPLATES=(starter tgi meta-reference-gpu postgres-demo)
 else
   TEMPLATES=(${TEMPLATES//,/ })
 fi

@@ -114,7 +114,7 @@ add_bump_version_commit() {
       done
     fi
 
-    uv export --frozen --no-hashes --no-emit-project --output-file=requirements.txt
+    uv export --frozen --no-hashes --no-emit-project --no-default-groups --output-file=requirements.txt
   fi
 
   git commit -am "build: Bump version to $version"

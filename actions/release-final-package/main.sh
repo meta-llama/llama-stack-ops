@@ -25,9 +25,9 @@ set -euo pipefail
 
 is_truthy() {
   case "$1" in
-    true|1) return 0 ;;
-    false|0) return 1 ;;
-    *) return 1 ;;
+  true | 1) return 0 ;;
+  false | 0) return 1 ;;
+  *) return 1 ;;
   esac
 }
 
@@ -53,7 +53,6 @@ if [ $found_rc -eq 0 ]; then
   echo "RC_VERSION $RC_VERSION not found on test.pypi" >&2
   exit 1
 fi
-
 
 REPOS=(stack-client-python stack-client-typescript stack)
 if is_truthy "$LLAMA_STACK_ONLY"; then
@@ -123,7 +122,7 @@ add_bump_version_commit() {
 
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
-uv venv -p python3.10 build-env
+uv venv -p python3.11 build-env
 source build-env/bin/activate
 
 uv pip install twine
@@ -157,7 +156,8 @@ llama model list
 llama stack list-apis
 llama stack list-providers inference
 
-llama stack build --template together --print-deps-only
+# just check if llama stack build works
+llama stack build --template together --print-deps-only --image-type venv
 
 if is_truthy "$DRY_RUN"; then
   echo "DRY RUN: skipping pypi upload"
@@ -188,7 +188,7 @@ rm -rf build-env
 for repo in "${REPOS[@]}"; do
   cd $TMPDIR
   if [ "$repo" != "stack-client-typescript" ]; then
-    uv venv -p python3.10 repo-$repo-env
+    uv venv -p python3.11 repo-$repo-env
     source repo-$repo-env/bin/activate
   fi
 

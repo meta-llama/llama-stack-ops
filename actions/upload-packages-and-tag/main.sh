@@ -31,7 +31,7 @@ is_truthy() {
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
 
-uv venv -p python3.10
+uv venv -p python3.11
 source .venv/bin/activate
 
 uv pip install twine

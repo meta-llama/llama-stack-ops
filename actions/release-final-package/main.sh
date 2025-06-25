@@ -122,7 +122,7 @@ add_bump_version_commit() {
 
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
-uv venv -p python3.11 build-env
+uv venv -p python3.12 build-env
 source build-env/bin/activate
 
 uv pip install twine
@@ -188,7 +188,7 @@ rm -rf build-env
 for repo in "${REPOS[@]}"; do
   cd $TMPDIR
   if [ "$repo" != "stack-client-typescript" ]; then
-    uv venv -p python3.11 repo-$repo-env
+    uv venv -p python3.12 repo-$repo-env
     source repo-$repo-env/bin/activate
   fi
 

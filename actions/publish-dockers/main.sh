@@ -33,7 +33,7 @@ fi
 set -x
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
-uv venv -p python3.11
+uv venv -p python3.12
 source .venv/bin/activate
 
 uv pip install --index-url https://test.pypi.org/simple/ \

@@ -23,10 +23,10 @@ runs:
   steps:
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
     - uses: astral-sh/setup-uv@v6
       with:
-        python-version: '3.11'
+        python-version: '3.12'
         enable-cache: false
     - uses: actions/setup-node@v3
       with:

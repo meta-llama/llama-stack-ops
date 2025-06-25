@@ -18,7 +18,7 @@ fi
 TMPDIR=$(mktemp -d)
 cd $TMPDIR
 
-uv venv -p python3.11
+uv venv -p python3.12
 source .venv/bin/activate
 
 max_attempts=6

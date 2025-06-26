@@ -11,9 +11,14 @@ on:
         description: 'Optional comma-separated templates to publish'
         required: false
         type: string
+      dockerhub_organization:
+        description: 'DockerHub organization'
+        required: false
+        type: string
+        default: llamastack
 
 jobs:
-  publish-docker-images:
+  publish-docker-images-amd64:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -23,3 +28,34 @@ jobs:
         templates: ${{ inputs.templates }}
         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        dockerhub_organization: ${{ inputs.dockerhub_organization }}
+        arch: amd64
+
+  publish-docker-images-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./actions/publish-dockers
+      with:
+        version: ${{ inputs.version }}
+        templates: ${{ inputs.templates }}
+        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        dockerhub_organization: ${{ inputs.dockerhub_organization }}
+        continue_on_error: true
+        arch: arm64
+
+  publish-docker-manifest-lists:
+    needs:
+    - publish-docker-images-amd64
+    - publish-docker-images-arm64
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./actions/publish-docker-manifest-lists
+      with:
+        version: ${{ inputs.version }}
+        templates: ${{ inputs.templates }}
+        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        dockerhub_organization: ${{ inputs.dockerhub_organization }}

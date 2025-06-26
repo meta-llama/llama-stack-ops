@@ -1,34 +1,15 @@
 #!/bin/bash
 
-if [ -z "$VERSION" ]; then
-  echo "You must set the VERSION environment variable" >&2
-  exit 1
-fi
-TEMPLATES=${TEMPLATES:-}
-
 set -euo pipefail
 
-release_exists() {
-  local source=$1
-  releases=$(curl -s https://${source}.org/pypi/llama-stack/json | jq -r '.releases | keys[]')
-  for release in $releases; do
-    if [ x"$release" = x"$VERSION" ]; then
-      return 0
-    fi
-  done
-  return 1
-}
+THIS_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+source $THIS_DIR/common.sh
 
-if release_exists "test.pypi"; then
-  echo "Version $VERSION found in test.pypi"
-  PYPI_SOURCE="testpypi"
-elif release_exists "pypi"; then
-  echo "Version $VERSION found in pypi"
-  PYPI_SOURCE="pypi"
-else
-  echo "Version $VERSION not found in either test.pypi or pypi" >&2
-  exit 1
-fi
+CONTINUE_ON_ERROR=${CONTINUE_ON_ERROR:-}
+ARCH=${ARCH:-amd64}
+
+# `llama stack build` uses the `BUILD_PLATFORM` as the architecture to build
+export BUILD_PLATFORM="linux/$ARCH"
 
 set -x
 TMPDIR=$(mktemp -d)
@@ -44,34 +25,48 @@ uv pip install --index-url https://test.pypi.org/simple/ \
 which llama
 llama stack list-apis
 
-build_and_push_docker() {
+last_build_error="false"
+handle_build_error() {
   template=$1
+  last_build_error="true"
 
-  echo "Building and pushing docker for template $template"
-  if [ "$PYPI_SOURCE" = "testpypi" ]; then
-    TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
+  echo "Error building template $template" >&2
+  if [ "$CONTINUE_ON_ERROR" = "true" ]; then
+    echo "Continuing on error" >&2
   else
-    PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container
-  fi
-  docker images
-
-  echo "Pushing docker image"
-  if [ "$PYPI_SOURCE" = "testpypi" ]; then
-    docker tag distribution-$template:test-${VERSION} llamastack/distribution-$template:test-${VERSION}
-    docker push llamastack/distribution-$template:test-${VERSION}
-  else
-    docker tag distribution-$template:${VERSION} llamastack/distribution-$template:${VERSION}
-    docker tag distribution-$template:${VERSION} llamastack/distribution-$template:latest
-    docker push llamastack/distribution-$template:${VERSION}
-    docker push llamastack/distribution-$template:latest
+    echo "Stopping on error" >&2
+    exit 1
   fi
 }
 
-if [ -z "$TEMPLATES" ]; then
-  TEMPLATES=(starter tgi meta-reference-gpu postgres-demo)
-else
-  TEMPLATES=(${TEMPLATES//,/ })
-fi
+build_and_push_docker() {
+  template=$1
+  last_build_error="false"
+
+  echo "Building docker image for template $template and platform $BUILD_PLATFORM"
+  if [ "$PYPI_SOURCE" = "testpypi" ]; then
+    TEST_PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container || handle_build_error $template
+  else
+    PYPI_VERSION=${VERSION} llama stack build --template $template --image-type container || handle_build_error $template
+  fi
+  docker images
+
+  if [ "$last_build_error" = "true" ]; then
+    echo "Skipping push for template $template because of build error"
+    return
+  fi
+
+  echo "Pushing docker image for template $template and platform $BUILD_PLATFORM"
+  if [ "$PYPI_SOURCE" = "testpypi" ]; then
+    docker tag distribution-$template:test-${VERSION} $DOCKERHUB_ORGANIZATION/distribution-$template:test-${VERSION}-${ARCH}
+    docker push $DOCKERHUB_ORGANIZATION/distribution-$template:test-${VERSION}-${ARCH}
+  else
+    docker tag distribution-$template:${VERSION} $DOCKERHUB_ORGANIZATION/distribution-$template:${VERSION}-${ARCH}
+    docker tag distribution-$template:${VERSION} $DOCKERHUB_ORGANIZATION/distribution-$template:latest-${ARCH}
+    docker push $DOCKERHUB_ORGANIZATION/distribution-$template:${VERSION}-${ARCH}
+    docker push $DOCKERHUB_ORGANIZATION/distribution-$template:latest-${ARCH}
+  fi
+}
 
 for template in "${TEMPLATES[@]}"; do
   build_and_push_docker $template

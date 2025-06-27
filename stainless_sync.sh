@@ -1,14 +1,13 @@
 #!/bin/bash
 
 # Add argument checking
-if [ "$#" -ne 2 ]; then
-    echo "Error: Script requires exactly 2 arguments"
-    echo "Usage: $0 <stainless_branch> <client_branch>"
+if [ "$#" -ne 1 ]; then
+    echo "Error: Script requires exactly 1 argument"
+    echo "Usage: $0 <client_branch>"
     exit 1
 fi
 
-stainless_branch="$1"
-client_branch="$2"
+client_branch="$1"
 
 set -euo pipefail
 set -x
@@ -16,12 +15,6 @@ set -x
 # Create temporary directory
 temp_dir=$(mktemp -d)
 echo "Working in temporary directory: $temp_dir"
-
-# Check if stainless branch exists in origin (without cloning)
-if ! git ls-remote --heads git@github.com:stainless-sdks/llama-stack-python.git "$stainless_branch" | grep -q "$stainless_branch"; then
-    echo "Error: Branch '$stainless_branch' not found in stainless repository"
-    exit 1
-fi
 
 # Check if client branch exists in origin (without cloning)
 if git ls-remote --heads git@github.com:meta-llama/llama-stack-client-python.git "$client_branch" | grep -q "$client_branch"; then
@@ -35,13 +28,12 @@ fi
 
 # Now proceed with cloning
 cd "$temp_dir"
-git clone git@github.com:stainless-sdks/llama-stack-python.git stainless
+git clone git@github.com:llamastack/llama-stack-client-python.git stainless
 git clone git@github.com:meta-llama/llama-stack-client-python.git client
 
 # Checkout branches after confirming they exist/don't exist
 cd "$temp_dir/stainless"
-git checkout "$stainless_branch"
-git pull
+stainless_commit_hash=$(git rev-parse HEAD)
 
 cd "$temp_dir/client"
 git checkout -b "$client_branch"
@@ -124,7 +116,7 @@ if [ -n "$(git status --porcelain)" ]; then
     git status
 
     git add .
-    git commit -m "Sync updates from stainless branch: $stainless_branch"
+    git commit -m "Sync updates from stainless: $stainless_commit_hash"
 
     # Ask for confirmation before pushing
     read -p "Do you want to push branch '$client_branch' to remote? (y/N) " -n 1 -r

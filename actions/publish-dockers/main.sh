@@ -68,7 +68,7 @@ build_and_push_docker() {
 }
 
 if [ -z "$TEMPLATES" ]; then
-  TEMPLATES=(starter tgi meta-reference-gpu postgres-demo)
+  TEMPLATES=(starter meta-reference-gpu postgres-demo nvidia open-benchmark vllm-gpu watson)
 else
   TEMPLATES=(${TEMPLATES//,/ })
 fi
